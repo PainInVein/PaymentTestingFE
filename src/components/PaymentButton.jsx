@@ -9,6 +9,14 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 // For demo – you can pass this as prop or get from URL/Redux/context later
 const DEFAULT_SUBSCRIPTION_ID = "7e259b3e-b40f-4bbf-b770-a221ad8670f0";
 
+const api = axios.create({
+  headers: {
+    common: {
+      "ngrok-skip-browser-warning": "true",
+    },
+  },
+});
+
 export default function PaymentButton({
   subscriptionId = DEFAULT_SUBSCRIPTION_ID,
 }) {
@@ -33,7 +41,7 @@ export default function PaymentButton({
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        const res = await axios.get(
+        const res = await api.get(
           `${BACKEND_URL}/api/Subscription?subscriptionId=${subscriptionId}`,
         );
 
@@ -63,7 +71,7 @@ export default function PaymentButton({
     setLoading(true);
 
     try {
-      const res = await axios.post(
+      const res = await api.post(
         `${BACKEND_URL}/api/payment/create-payment-intent`,
         {
           amount: subscription.subscriptionPrice,
