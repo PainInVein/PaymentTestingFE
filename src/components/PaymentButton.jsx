@@ -23,17 +23,13 @@ export default function PaymentButton({
   const [loading, setLoading] = useState(false);
   const [subscription, setSubscription] = useState(null);
   const [fetchError, setFetchError] = useState(null);
-  const [payOSReady, setPayOSReady] = useState(false);
 
   // Load payOS SDK once
   useEffect(() => {
     const script = document.createElement("script");
     script.src =
       "https://cdn.payos.vn/payos-checkout/v1/stable/payos-initialize.js";
-    script.onload = () => {
-      console.log("PayOS SDK loaded");
-      setPayOSReady(true);
-    };
+    script.async = true;
     document.body.appendChild(script);
 
     return () => {
@@ -69,10 +65,6 @@ export default function PaymentButton({
   const handlePay = async () => {
     if (!subscription) {
       toast.error("Chưa có thông tin gói. Vui lòng thử lại.");
-      return;
-    }
-    if (!payOSReady || !window.PayOS) {
-      toast.error("PayOS chưa sẵn sàng, vui lòng đợi 1–2 giây");
       return;
     }
 
