@@ -4,9 +4,7 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-// Change to your ngrok/public URL later, e.g. https://abc123.ngrok-free.app
 
-// For demo – you can pass this as prop or get from URL/Redux/context later
 const DEFAULT_SUBSCRIPTION_ID = "7e259b3e-b40f-4bbf-b770-a221ad8670f0";
 
 const api = axios.create({
@@ -24,19 +22,6 @@ export default function PaymentButton({
   const [subscription, setSubscription] = useState(null);
   const [fetchError, setFetchError] = useState(null);
 
-  // Load payOS SDK once
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src =
-      "https://cdn.payos.vn/payos-checkout/v1/stable/payos-initialize.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
   // Fetch subscription details
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -51,7 +36,7 @@ export default function PaymentButton({
           throw new Error(res.data.message || "Không tìm thấy gói");
         }
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch subscription:", err);
         setFetchError(
           err.response?.data?.message || "Không thể tải thông tin gói",
         );
@@ -79,38 +64,31 @@ export default function PaymentButton({
         },
       );
 
-      // Adjust according to your actual response shape
-      // If using ResponseDTO: res.data.data.checkoutUrl or res.data.checkoutUrl
-      const { checkoutUrl } = res.data.data || res.data;
+      // Handle both common response shapes
+      const payload = res.data?.data ?? res.data ?? {};
+      const checkoutUrl = payload.checkoutUrl;
 
       if (!checkoutUrl) {
-        throw new Error("Không nhận được link thanh toán");
+        console.error("No checkoutUrl in response:", payload);
+        throw new Error("Không nhận được link thanh toán từ server");
       }
 
-      if (!window.PayOS) {
-        throw new Error("payOS SDK chưa sẵn sàng. Thử lại sau vài giây.");
+      if (typeof checkoutUrl !== "string" || !checkoutUrl.startsWith("http")) {
+        console.error("Invalid checkoutUrl format:", checkoutUrl);
+        throw new Error("Link thanh toán không hợp lệ");
       }
 
-      window.PayOS.open({
-        checkoutUrl,
-        onSuccess: (response) => {
-          toast.success(
-            `Thanh toán thành công! Mã đơn: ${response.orderCode || "—"}`,
-          );
-          setTimeout(() => {
-            window.location.href = "/payment/success";
-          }, 1500);
-        },
-        onCancel: () => {
-          toast.error("Thanh toán đã bị hủy");
-        },
-        onClose: () => {
-          toast("Cửa sổ thanh toán đã đóng", { icon: "⚠️" });
-        },
-      });
+      console.log("Redirecting to PayOS:", checkoutUrl);
+
+      // The simplest working method: full redirect
+      window.location.href = checkoutUrl;
     } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Lỗi khởi tạo thanh toán");
+      console.error("Payment initiation failed:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Lỗi khi khởi tạo thanh toán. Vui lòng thử lại.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
