@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const DEFAULT_SUBSCRIPTION_ID = "7e259b3e-b40f-4bbf-b770-a221ad8670f0";
+const USER_ID = "60e7ba74-220e-4be5-af9b-97d8736a442f";
 
 const api = axios.create({
   headers: {
@@ -58,9 +59,18 @@ export default function PaymentButton({
     try {
       const res = await api.post(
         `${BACKEND_URL}/api/payment/create-payment-intent`,
+        // {
+        //   amount: subscription.subscriptionPrice,
+        //   description: `${subscription.subscriptionName} - ${subscription.description || "Gói đăng ký"}`,
+        // },
         {
-          amount: subscription.subscriptionPrice,
-          description: `${subscription.subscriptionName} - ${subscription.description || "Gói đăng ký"}`,
+          userId: USER_ID,
+          subscriptionInfo: {
+            subscriptionId: subscription.result.subscriptionId,
+            subscriptionName: subscription.result.subscriptionName,
+            subscriptionPrice: subscription.result.subscriptionPrice,
+            billingPeriod: subscription.result.billingPeriod,
+          },
         },
       );
 
