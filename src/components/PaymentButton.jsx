@@ -66,10 +66,10 @@ export default function PaymentButton({
         {
           userId: USER_ID,
           subscriptionInfo: {
-            subscriptionId: subscription.result.subscriptionId,
-            subscriptionName: subscription.result.subscriptionName,
-            subscriptionPrice: subscription.result.subscriptionPrice,
-            billingPeriod: subscription.result.billingPeriod,
+            subscriptionId: subscription.data.result.subscriptionId,
+            subscriptionName: subscription.data.result.subscriptionName,
+            subscriptionPrice: subscription.data.result.subscriptionPrice,
+            billingPeriod: subscription.data.result.billingPeriod,
           },
         },
       );
