@@ -75,11 +75,16 @@ export default function PaymentButton({
       );
 
       // Handle both common response shapes
-      const payload = res.data?.data ?? res.data ?? {};
-      const checkoutUrl = payload.checkoutUrl;
+      const responseData = res.data;
+
+      if (!responseData.isSuccess) {
+        throw new Error(responseData.message || "Tạo link thanh toán thất bại");
+      }
+
+      const checkoutUrl = responseData.result?.checkoutUrl;
 
       if (!checkoutUrl) {
-        console.error("No checkoutUrl in response:", payload);
+        console.error("No checkoutUrl in result:", responseData);
         throw new Error("Không nhận được link thanh toán từ server");
       }
 
