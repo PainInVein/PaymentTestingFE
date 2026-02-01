@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function PaymentCancel() {
   const [paymentInfo] = useState(() => {
@@ -12,6 +12,64 @@ export default function PaymentCancel() {
       orderCode: params.get("orderCode") || "N/A",
     };
   });
+
+  const [notifyStatus, setNotifyStatus] = useState(""); // optional: show feedback
+
+  useEffect(() => {
+    // Skip if no valid orderCode (prevents useless calls)
+    if (!paymentInfo.orderCode || paymentInfo.orderCode === "N/A") {
+      console.warn("No valid orderCode found in URL — skipping backend notify");
+      return;
+    }
+
+    const notifyBackend = async () => {
+      try {
+        // Build query string from the same params
+        const params = new URLSearchParams({
+          Code: paymentInfo.code,
+          PaymentLinkId: paymentInfo.paymentLinkId,
+          Status: paymentInfo.status,
+          OrderCode: paymentInfo.orderCode, // backend expects long → string is fine
+          Cancel: paymentInfo.cancel,
+        });
+
+        const url = `https://your-backend-domain.com/SubscriptionPayment/cancel-payment?${params.toString()}`;
+
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            // Add Authorization header if your endpoint requires auth
+            // "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(
+            `Backend responded with ${response.status}: ${errorText}`,
+          );
+        }
+
+        const data = await response.json();
+        console.log("Backend cancel update success:", data);
+
+        // Optional: show success message in UI
+        setNotifyStatus("Đã thông báo hủy thanh toán cho hệ thống.");
+      } catch (err) {
+        console.error("Failed to notify backend about cancellation:", err);
+        // Optional: show error (non-blocking — don't block UI)
+        setNotifyStatus(
+          "Không thể cập nhật trạng thái hủy (lỗi mạng). Vui lòng liên hệ hỗ trợ nếu cần.",
+        );
+      }
+    };
+
+    notifyBackend();
+
+    // Optional: prevent resending on hot-reload / StrictMode double mount in dev
+    // You can add a simple flag or use a ref if needed in production
+  }, [paymentInfo]); // only run when paymentInfo changes (practically once)
 
   return (
     <div
@@ -29,6 +87,19 @@ export default function PaymentCancel() {
       <p style={{ fontSize: "18px", marginBottom: "32px" }}>
         Bạn đã hủy quá trình thanh toán. Không có khoản phí nào được trừ.
       </p>
+
+      {/* Optional feedback area */}
+      {notifyStatus && (
+        <p
+          style={{
+            color: notifyStatus.includes("lỗi") ? "#dc3545" : "#198754",
+            marginBottom: "20px",
+            fontWeight: "500",
+          }}
+        >
+          {notifyStatus}
+        </p>
+      )}
 
       <div
         style={{
@@ -61,7 +132,7 @@ export default function PaymentCancel() {
 
       <div style={{ display: "flex", gap: "16px", justifyContent: "center" }}>
         <button
-          onClick={() => (window.location.href = "/")} // or "/subscriptions" / dashboard
+          onClick={() => (window.location.href = "/")} // or "/subscriptions" etc.
           style={{
             padding: "12px 32px",
             fontSize: "16px",
@@ -76,7 +147,9 @@ export default function PaymentCancel() {
         </button>
 
         <button
-          onClick={() => window.location.reload()} // or navigate to payment page again
+          onClick={() =>
+            (window.location.href = `/payment?orderCode=${paymentInfo.orderCode}`)
+          } // better than reload
           style={{
             padding: "12px 32px",
             fontSize: "16px",
