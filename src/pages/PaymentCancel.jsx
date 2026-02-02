@@ -42,6 +42,7 @@ export default function PaymentCancel() {
             Accept: "application/json",
             // Add Authorization header if your endpoint requires auth
             // "Authorization": `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
           },
         });
 
