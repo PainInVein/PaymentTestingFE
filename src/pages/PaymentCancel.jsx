@@ -34,7 +34,7 @@ export default function PaymentCancel() {
           Cancel: paymentInfo.cancel,
         });
 
-        const url = `${BACKEND_URL}/SubscriptionPayment/cancel-payment?${params.toString()}`;
+        const url = `${BACKEND_URL}/api/SubscriptionPayment/cancel-payment?${params.toString()}`;
 
         const response = await fetch(url, {
           method: "GET",
