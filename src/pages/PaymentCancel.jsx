@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 export default function PaymentCancel() {
   const [paymentInfo] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -12,7 +14,6 @@ export default function PaymentCancel() {
       orderCode: params.get("orderCode") || "N/A",
     };
   });
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const [notifyStatus, setNotifyStatus] = useState(""); // optional: show feedback
 
   useEffect(() => {
