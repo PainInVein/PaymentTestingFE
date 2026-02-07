@@ -5,8 +5,8 @@ import toast, { Toaster } from "react-hot-toast";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-const DEFAULT_SUBSCRIPTION_ID = "7e259b3e-b40f-4bbf-b770-a221ad8670f0";
-const USER_ID = "60e7ba74-220e-4be5-af9b-97d8736a442f";
+const DEFAULT_SUBSCRIPTION_ID = "c9391943-fb94-46c6-8c1c-3dc2752e5073";
+const USER_ID = "d42ad28b-533b-4c99-8b49-edd59912eb32";
 
 const api = axios.create({
   headers: {
