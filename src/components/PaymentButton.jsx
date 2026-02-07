@@ -34,7 +34,7 @@ export default function PaymentButton({
         if (res.data.isSuccess && res.data.result) {
           setSubscription(res.data.result);
         } else {
-          throw new Error(res.data.message || "Không tìm thấy gói");
+          throw new Error(res.data.message || "Không tìm thấy gói1");
         }
       } catch (err) {
         console.error("Failed to fetch subscription:", err);
